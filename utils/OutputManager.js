@@ -40,7 +40,6 @@ module.exports = class OutputManager {
     const id = Math.random().toString(10).substr(2);
     powercord.api.notices.sendToast(`${this.startID}-${id}`, {
       header: 'Translation Option',
-      timeout: 4e3,
       content,
       type,
       buttons

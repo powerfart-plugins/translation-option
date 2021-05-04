@@ -6,11 +6,11 @@ const codes = require('../codes.json');
 const Tooltip = getModuleByDisplayName('Tooltip', false);
 const { timestamp, timestampInline, edited } = getModule([ 'timestamp', 'timestampInline', 'edited' ], false);
 
-module.exports = class TOPointer extends React.PureComponent {
+module.exports = class TranslationOption extends React.PureComponent {
   render () {
     const from = this.props.from
       .filter((e, i, arr) => (arr.indexOf(e) === i))
-      .map((e) => codes[e].EnglishLanguageName).join(', ');
+      .map((e) => codes[e]?.EnglishLanguageName || e).join(', ');
     const to = codes[this.props.to].EnglishLanguageName;
 
     return (

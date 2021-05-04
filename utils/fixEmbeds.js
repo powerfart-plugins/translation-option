@@ -25,6 +25,10 @@ function fixObject (obj) {
     if (newKey) {
       renameKey(key, newKey, obj);
     }
+    if (key === 'image') {
+      obj.image.proxy_url = value.proxyURL;
+      renameKey('image', 'thumbnail', obj);
+    }
     if (Array.isArray(value)) {
       obj[newKey || key] = fixArrays(obj[newKey || key]);
     }

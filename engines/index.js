@@ -2,7 +2,7 @@ const { readdirSync } = require('fs');
 const { resolve } = require('path');
 const { _ } = global;
 
-const { getModule, FluxDispatcher, i18n: { Messages } } = require('powercord/webpack');
+const { getModule, FluxDispatcher } = require('powercord/webpack');
 const { fixEmbeds } = require('../utils');
 
 const userSettings = getModule([ 'afkTimeout', 'locale', 'developerMode' ], false);
@@ -87,7 +87,8 @@ module.exports = class TranslationManager {
       this.messagesStorage.set(key, {
         original: {
           content: message.content,
-          embeds: embedsFixed
+          embeds: embedsFixed,
+          user: message.user // обход ошибки "[MessageStore] Message was missing an author!"
         },
         translated: true,
         from: fromIso,
