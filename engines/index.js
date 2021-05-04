@@ -14,6 +14,7 @@ module.exports = class TranslationManager {
     this.settings = settings;
     this.Engines = {};
     this.messagesStorage = new Map(); // Map(channelID-MessageID, { original, translated, ... })
+    this.initEngines();
   }
 
   get infoEngines () {
@@ -88,7 +89,7 @@ module.exports = class TranslationManager {
         original: {
           content: message.content,
           embeds: embedsFixed,
-          user: message.user // обход ошибки "[MessageStore] Message was missing an author!"
+          author: message.author // обход ошибки "[MessageStore] Message was missing an author!"
         },
         translated: true,
         from: fromIso,

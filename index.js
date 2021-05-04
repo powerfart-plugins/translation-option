@@ -37,7 +37,6 @@ module.exports = class TranslationOption extends Plugin {
     this.loadStylesheet('style.scss');
 
     this.Patcher.inject();
-    this.Translator.initEngines();
 
     Dispatcher.subscribe('MESSAGE_UPDATE', this.messageUpdate);
     Dispatcher.subscribe('MESSAGE_CREATE', this.messageCreate);
@@ -82,12 +81,11 @@ module.exports = class TranslationOption extends Plugin {
           return;
         }
         this.OutputManager.error(`${Messages.TRANSLATION_OPTION_ERRORS_TRANSLATE}: ${err.name}`);
-        console.error(
+        this.error(
           `${this.settings.get('inEngine', null)}:`,
           `${this.settings.get('inFrom', 'auto')}->${this.settings.get('inTo', 'user lang')} \n`,
           err
         );
-        // throw err;
       });
   }
 

@@ -25,7 +25,7 @@ function fixObject (obj) {
     if (newKey) {
       renameKey(key, newKey, obj);
     }
-    if (key === 'image') {
+    if (key === 'image' && obj.type !== 'rich') {
       obj.image.proxy_url = value.proxyURL;
       renameKey('image', 'thumbnail', obj);
     }

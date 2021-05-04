@@ -20,13 +20,13 @@ module.exports = class Patcher {
     Object.getOwnPropertyNames(Patcher.prototype)
       .filter((f) => f.startsWith('patch'))
       .forEach((name) => {
-        const { module, func, callback, displayName, pre } = this[name];
+        const { module, method, func, displayName, pre } = this[name];
         const injectId = `translation-option${(displayName || name.replace(/^patch/, '')).replace(/[A-Z]/g, (l) => `-${l.toLowerCase()}`)}`;
 
-        inject(injectId, module, func, callback, pre);
+        inject(injectId, module, method, func, pre);
         this._uninjectIDs.push(injectId);
         if (displayName) {
-          module[func].displayName = displayName;
+          module[method].displayName = displayName;
         }
       });
   }
@@ -39,8 +39,8 @@ module.exports = class Patcher {
     return {
       module: getModule((m) => m?.default?.displayName === 'MessageContextMenu', false),
       displayName: 'MessageContextMenu',
-      func: 'default',
-      callback: ([ { message } ], res) => {
+      method: 'default',
+      func: ([ { message } ], res) => {
         const { props: { children } } = res;
         const [ btn ] = ContextMenu.renderRawItems([ {
           type: 'button',
@@ -60,8 +60,8 @@ module.exports = class Patcher {
     return {
       module: MiniPopover,
       displayName: 'MiniPopover',
-      func: 'default',
-      callback: (args, res) => {
+      method: 'default',
+      func: (args, res) => {
         const props = findInReactTree(res, ({ message }) => message);
         if (props) {
           res.props.children.unshift(
@@ -84,8 +84,8 @@ module.exports = class Patcher {
     return {
       module: getModule((m) => m?.type?.render?.displayName === 'ChannelTextAreaContainer', false).type,
       displayName: 'ChannelTextAreaContainer',
-      func: 'render',
-      callback: (args, res) => {
+      method: 'render',
+      func: (args, res) => {
         const props = findInReactTree(res, ({ className }) => className?.includes('buttons-'));
         if (props) {
           props.children.unshift(
@@ -106,8 +106,8 @@ module.exports = class Patcher {
     return {
       module: getModule((m) => m?.type?.displayName === 'MessageContent', false),
       displayName: 'MessageContent',
-      func: 'type',
-      callback: ([ { message } ], res) => {
+      method: 'type',
+      func: ([ { message } ], res) => {
         if (this.Translator.isTranslated(message)) {
           const { from, to } = this.Translator.messagesStorage.get(`${message.channel_id}-${message.id}`);
           res.props.children.push(React.createElement(Pointer, { from, to }));
@@ -123,9 +123,9 @@ module.exports = class Patcher {
     return {
       module: messages,
       displayName: null,
-      func: 'sendMessage',
+      method: 'sendMessage',
       pre: true,
-      callback: ([ id, message, ...args ]) => {
+      func: ([ id, message, ...args ]) => {
         const { Translator, props: { settings } } = this;
         const error = (msg) => {
           this.OutputManager.error(msg, [ {
@@ -160,6 +160,25 @@ module.exports = class Patcher {
         }
 
         return [ id, message, ...args ];
+      }
+    };
+  }
+
+  get patchEditMessage () {
+    return {
+      module: getModule([ 'editMessage' ], false),
+      displayName: null,
+      method: 'editMessage',
+      pre: true,
+      func: ([ channel, message, config ]) => {
+        if (this.Translator.isTranslated(message)) {
+          const { original } = this.Translator.messagesStorage.get(`${message.channel_id}-${message.id}`);
+          message.content = original.content;
+          message.embeds = original.embeds;
+          this.Translator.recover(message);
+        }
+
+        return [ channel, message, config ];
       }
     };
   }
