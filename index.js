@@ -11,7 +11,7 @@ const i18n = require('./i18n');
 const Translator = require('./engines');
 const { Patcher, OutputManager } = require('./utils');
 
-const { default: Dispatcher } = getModule([ 'Dispatcher' ], false);
+const { default: Dispatcher } = getModule((m) => m?.default?._subscriptions, false);
 
 /* eslint-disable object-property-newline */
 // noinspection ES6MissingAwait, JSCheckFunctionSignatures, JSIgnoredPromiseFromCall, JSUnusedGlobalSymbols

@@ -2,7 +2,7 @@
  * A component that does routine work for you
  * @author Xinos#2003
  * @licence MIT
- * @version 1.4
+ * @version 1.3.1
  * @link https://github.com/powerfart-plugins/Settings-component
  * @docs https://github.com/powerfart-plugins/Settings-component#documentation
  * @copyright (c) 2021 Xinos
