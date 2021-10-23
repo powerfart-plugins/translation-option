@@ -17,7 +17,7 @@ function fixObject (obj) {
   if ('id' in obj) {
     delete obj.id;
   }
-  if ('color' in obj) {
+  if ('color' in obj && !isNaN(obj.color)) {
     obj.color = String(hex2int(obj.color));
   }
   Object.entries(obj).forEach(([ key, value ]) => {
