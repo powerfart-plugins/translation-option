@@ -83,7 +83,7 @@ module.exports = class TranslationOption extends Plugin {
         this.OutputManager.error(`${Messages.TRANSLATION_OPTION_ERRORS_TRANSLATE}: ${err.name}`);
         this.error(
           `${this.settings.get('inEngine', null)}:`,
-          `${this.settings.get('inFrom', 'auto')}->${this.settings.get('inTo', 'user lang')} \n`,
+          `${this.settings.get('inFrom', 'auto').toUpperCase()} -> ${this.settings.get('inTo', this.Translator.userLocale).toUpperCase()} \n`,
           err
         );
       });

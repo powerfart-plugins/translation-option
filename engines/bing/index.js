@@ -24,8 +24,6 @@ module.exports = class Bing extends Engine {
       .then((res) => ({
         text: res.translation,
         iso: res.language.from
-      })).catch((err) => {
-        console.error(err);
-      });
+      }));
   }
 };
