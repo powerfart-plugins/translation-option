@@ -5,7 +5,7 @@ const { _ } = global;
 const { getModule, FluxDispatcher } = require('powercord/webpack');
 const { fixEmbeds } = require('../utils');
 
-const userSettings = getModule([ 'afkTimeout', 'locale', 'developerMode' ], false);
+const userSettings = getModule([ 'locale', 'theme' ], false);
 
 // noinspection JSUnusedGlobalSymbols, BadExpressionStatementJS
 module.exports = class TranslationManager {
