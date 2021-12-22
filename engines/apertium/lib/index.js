@@ -1,27 +1,28 @@
-/* eslint-disable object-property-newline, no-use-before-define */
 
-const { get } = require('powercord/http');
+const { encode } = require('querystring');
 
 const API_ENDPOINT = 'https://apertium.org/apy/translate';
 
+/* eslint-disable object-property-newline */
 module.exports = function (text, { from, to }) {
-  const url = new URL(API_ENDPOINT);
+  return fetch(API_ENDPOINT, {
+    method: 'POST',
+    body: encode({ langpair: `${from}|${to}`, q: text }),
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+  })
+    .then(async (res) => {
+      const json = await res.json();
+      const error = new Error();
 
-  url.searchParams.set('langpair', `${from}|${to}`);
-  url.searchParams.set('q', text);
-
-  return get(url.href)
-    .then((res) => ({
-      text: res.body.responseData.translatedText,
-      lang: from
-    }))
-    .catch((res) => {
-      if (res.body.explanation === 'That pair is not installed') {
-        const error = new Error();
-        error.name = 'Not supported pair';
-        error.code = 'NOT_SUPPORTED_PAIR';
-        throw error;
+      if (res.ok) {
+        return json;
       }
-      throw res;
-    });
+      error.code = json.message.toUpperCase().replaceAll(' ', '_');
+      error.name = json.explanation;
+      throw error;
+    })
+    .then((res) => ({
+      text: res.responseData.translatedText,
+      lang: from
+    }));
 };
