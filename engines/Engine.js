@@ -16,7 +16,7 @@ const { exceptions } = require('../utils');
 // noinspection JSUnusedGlobalSymbols
 module.exports = class Engine {
   constructor ({ __dirname, needNodeModules } = {}) {
-    this.cacheTranslation = {}; // { ru: Map(raw, text), es: Map(raw, text), ... }
+    this.cacheTranslation = {}; // { lang<string>: Map(raw, {iso<string>, text<string>), ...}
     this.rateLimit = 1000;
     this.lastRun = 0;
     this._needNodeModules = needNodeModules;
@@ -101,10 +101,10 @@ module.exports = class Engine {
     const cache = this.cacheTranslation;
 
     return new Promise((resolve, reject) => {
-      const drop = (t) => resolve({ text: t, iso: to });
+      const drop = (t) => resolve(t);
 
       if (rawText === '') {
-        drop(raw);
+        drop({ text: raw, iso: null });
         return;
       }
       if (to in cache) {
@@ -118,7 +118,7 @@ module.exports = class Engine {
       this._translateTimeoutHandler(rawText, { from, to })
         .then(({ text, iso }) => {
           text = exceptions.insert([ text, excepts ]);
-          cache[to].set(key, text);
+          cache[to].set(key, { text, iso });
           resolve({ text, iso });
         })
         .catch(reject);

@@ -1,10 +1,10 @@
 const { React, getModule, getModuleByDisplayName, i18n: { Messages } } = require('powercord/webpack');
-// const { Tooltip } = require('powercord/components');
 
 const codes = require('../codes.json');
 
 const Tooltip = getModuleByDisplayName('Tooltip', false);
 const { timestamp, timestampInline, edited } = getModule([ 'timestamp', 'timestampInline', 'edited' ], false);
+const ReactMarkdown = getModule([ 'ReactMarkdown' ], false);
 
 module.exports = class TranslationOption extends React.PureComponent {
   render () {
@@ -14,7 +14,7 @@ module.exports = class TranslationOption extends React.PureComponent {
     const to = codes[this.props.to].EnglishLanguageName;
 
     return (
-      <Tooltip text={`From: ${from} | To: ${to}`}>
+      <Tooltip text={ReactMarkdown.markdownToReact(`Original: ${from} \n\n Translated: ${to}`)}>
         {({ onMouseLeave, onMouseEnter }) => (
           <span
             className={[ timestamp, timestampInline ].join(' ')}
