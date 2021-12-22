@@ -41,13 +41,14 @@ function genReqId () {
  * @return {Promise<String>}
  */
 async function updateReqId () {
+  console.log('%c[TranslationOption]', 'color: #1967d2', 'Yandex: update reqId...');
+
   cache.reqId = await genReqId();
   writeFile(resolve(__dirname, './cache.json'), JSON.stringify(cache, null, 2), (err) => {
     if (err) {
       throw err;
     }
   });
-  console.log('%c[TranslationOption]', 'color: #1967d2', 'Yandex: update reqId');
   return cache.reqId;
 }
 
@@ -80,12 +81,12 @@ async function translate (text, { from, to }) {
   const reqId = cache.reqId || await updateReqId();
 
   return makeRequest(text, { from, to }, reqId)
-    .then(async (res) => {
-      if (res.statusCode === '403') {
+    .catch(async (err) => {
+      if (err.statusCode === 403) {
         const reqId = await updateReqId();
         return makeRequest(text, { from, to }, reqId);
       }
-      return res;
+      throw err;
     })
     .then((res) => ({
       text: res.body.text.shift(),
