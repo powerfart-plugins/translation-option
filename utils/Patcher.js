@@ -23,6 +23,15 @@ module.exports = class Patcher {
         const { module, method, func, displayName, pre } = this[name];
         const injectId = `translation-option${(displayName || name.replace(/^patch/, '')).replace(/[A-Z]/g, (l) => `-${l.toLowerCase()}`)}`;
 
+        if (module === null) {
+          const id = 'translation-option';
+          const { plugins } = powercord.pluginManager;
+          const out = (plugins.has(id)) ? plugins.get(id) : global.console;
+
+          out.error(`Module "${displayName}" not found`);
+          return;
+        }
+
         inject(injectId, module, method, func, pre);
         this._uninjectIDs.push(injectId);
         if (displayName) {
