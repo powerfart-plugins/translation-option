@@ -9,7 +9,8 @@ const { settings } = require('./structures');
 const i18n = require('./i18n');
 
 const Translator = require('./engines');
-const { Patcher, OutputManager } = require('./utils');
+const Patcher = require('./modules/Patcher');
+const OutputManager = require('./modules/OutputManager');
 
 const { default: Dispatcher } = getModule((m) => m?.default?._subscriptions, false);
 

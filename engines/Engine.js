@@ -10,7 +10,7 @@ const { resolve } = require('path');
 const { existsSync } = require('fs');
 const { spawn } = require('child_process');
 
-const { exceptions } = require('../utils');
+const exceptions = require('../utils/exceptions');
 
 /* eslint-disable no-use-before-define, no-unused-vars,object-property-newline */
 // noinspection JSUnusedGlobalSymbols

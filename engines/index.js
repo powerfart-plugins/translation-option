@@ -3,7 +3,7 @@ const { resolve } = require('path');
 const { _ } = global;
 
 const { getModule, FluxDispatcher } = require('powercord/webpack');
-const { fixEmbeds } = require('../utils');
+const fixEmbeds = require('../utils/fixEmbeds');
 
 const userSettings = getModule([ 'locale', 'theme' ], false);
 
