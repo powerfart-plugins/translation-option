@@ -1,7 +1,7 @@
 const { inject, uninject } = require('powercord/injector');
 const { ContextMenu } = require('powercord/components');
 const { findInReactTree } = require('powercord/util');
-const { React, getModule, i18n: { Messages } } = require('powercord/webpack');
+const { React, getModule, getModuleByDisplayName, i18n: { Messages } } = require('powercord/webpack');
 
 const TranslateButton = require('../components/TranslateButton.jsx');
 const Pointer = require('../components/Pointer.jsx');
@@ -19,46 +19,79 @@ module.exports = class Patcher {
   inject () {
     Object.getOwnPropertyNames(Patcher.prototype)
       .filter((f) => f.startsWith('patch'))
-      .forEach((name) => {
-        const { module, method, func, displayName, pre } = this[name];
-        const injectId = `translation-option${(displayName || name.replace(/^patch/, '')).replace(/[A-Z]/g, (l) => `-${l.toLowerCase()}`)}`;
+      .forEach((name) => this._inject2(this[name], name.replace(/^patch/, '')));
+  }
 
-        if (module === null) {
-          const id = 'translation-option';
-          const { plugins } = powercord.pluginManager;
-          const out = (plugins.has(id)) ? plugins.get(id) : global.console;
+  _inject2 ({ module, method, func, displayName, pre }, funcName = null) {
+    const injectId = `translation-option${(displayName || funcName).replace(/[A-Z]/g, (l) => `-${l.toLowerCase()}`)}`;
 
-          out.error(`Module "${displayName}" not found`);
-          return;
-        }
+    if (module === null) {
+      const id = 'translation-option';
+      const { plugins } = powercord.pluginManager;
+      const out = (plugins.has(id)) ? plugins.get(id) : global.console;
 
-        inject(injectId, module, method, func, pre);
-        this._uninjectIDs.push(injectId);
-        if (displayName) {
-          module[method].displayName = displayName;
-        }
-      });
+      out.error(`Module "${displayName}" not found`);
+      return;
+    }
+
+    inject(injectId, module, method, func, pre);
+    this._uninjectIDs.push(injectId);
+    if (displayName) {
+      module[method].displayName = displayName;
+    }
   }
 
   uninject () {
     this._uninjectIDs.forEach(uninject);
   }
 
-  get patchMessageContextMenu () {
+  get patchOpenContextMenuLazy () {
+    let isInjected = false;
+    const injectNow = () => {
+      this._inject2({
+        module: getModule((m) => m?.default?.displayName === 'MessageContextMenu', false),
+        displayName: 'MessageContextMenu',
+        method: 'default',
+        func: ([ { message } ], res) => {
+          const { props: { children } } = res;
+          const [ btn ] = ContextMenu.renderRawItems([ {
+            type: 'button',
+            name: (this.Translator.isTranslated(message)) ? Messages.TRANSLATION_OPTION_SHOW_ORIGINAL : Messages.TRANSLATION_OPTION_TRANSLATE_MESSAGE,
+            disabled: !message.content && !message.embeds.length,
+            onClick: () => this.props.translate(message)
+          } ]);
+          children.splice(children.length - 1, 0, btn);
+          return res;
+        }
+      });
+    };
+
     return {
-      module: getModule((m) => m?.default?.displayName === 'MessageContextMenu', false),
-      displayName: 'MessageContextMenu',
-      method: 'default',
-      func: ([ { message } ], res) => {
-        const { props: { children } } = res;
-        const [ btn ] = ContextMenu.renderRawItems([ {
-          type: 'button',
-          name: (this.Translator.isTranslated(message)) ? Messages.TRANSLATION_OPTION_SHOW_ORIGINAL : Messages.TRANSLATION_OPTION_TRANSLATE_MESSAGE,
-          disabled: !message.content && !message.embeds.length,
-          onClick: () => this.props.translate(message)
-        } ]);
-        children.splice(children.length - 1, 0, btn);
-        return res;
+      module: getModule([ 'openContextMenuLazy' ], false),
+      displayName: null,
+      method: 'openContextMenuLazy',
+      pre: true,
+      func: ([ event, lazyRender, params ]) => {
+        const warpLazyRender = () => new Promise(async (resolve) => {
+          const render = await lazyRender(event);
+
+          resolve((config) => {
+            const menu = render(config);
+            const CMName = menu.type.displayName;
+            const moduleByDisplayName = getModuleByDisplayName(CMName, false);
+
+            if (!isInjected) {
+              injectNow();
+              isInjected = true;
+            }
+            if (moduleByDisplayName !== null) {
+              menu.type = moduleByDisplayName;
+            }
+            return menu;
+          });
+        });
+
+        return [ event, warpLazyRender, params ];
       }
     };
   }
