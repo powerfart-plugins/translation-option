@@ -4,7 +4,7 @@ const Tooltip = getModuleByDisplayName('Tooltip', false);
 const { Translate } = require('./icons');
 const { button } = getModule([ 'button', 'buttonWrapper', 'pulseButton' ], false);
 
-module.exports = class TranslationOption extends React.PureComponent {
+module.exports = class TranslationOptionButton extends React.PureComponent {
   render () {
     const { Button } = this.props;
     return (

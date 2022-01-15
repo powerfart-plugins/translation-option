@@ -3,7 +3,7 @@ const { ContextMenu } = require('powercord/components');
 const { findInReactTree } = require('powercord/util');
 const { React, getModule, getModuleByDisplayName, i18n: { Messages } } = require('powercord/webpack');
 
-const TranslateButton = require('../components/TranslateButton.jsx');
+const TranslateButton = require('../components/TranslationOptionButton.jsx');
 const Pointer = require('../components/Pointer.jsx');
 
 /* eslint-disable object-property-newline */
@@ -72,24 +72,27 @@ module.exports = class Patcher {
       method: 'openContextMenuLazy',
       pre: true,
       func: ([ event, lazyRender, params ]) => {
-        const warpLazyRender = () => new Promise(async (resolve) => {
+        const warpLazyRender = async () => {
           const render = await lazyRender(event);
 
-          resolve((config) => {
+          return (config) => {
             const menu = render(config);
-            const CMName = menu.type.displayName;
-            const moduleByDisplayName = getModuleByDisplayName(CMName, false);
+            const CMName = menu?.type?.displayName;
 
-            if (!isInjected) {
-              injectNow();
-              isInjected = true;
-            }
-            if (moduleByDisplayName !== null) {
-              menu.type = moduleByDisplayName;
+            if (CMName) {
+              const moduleByDisplayName = getModuleByDisplayName(CMName, false);
+
+              if (!isInjected && CMName === 'MessageContextMenu') {
+                injectNow();
+                isInjected = true;
+              }
+              if (moduleByDisplayName !== null) {
+                menu.type = moduleByDisplayName;
+              }
             }
             return menu;
-          });
-        });
+          };
+        };
 
         return [ event, warpLazyRender, params ];
       }
