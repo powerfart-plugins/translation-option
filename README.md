@@ -1,4 +1,9 @@
 # Translation option
+
+> **Warning**
+> Powercord client is EOL and no longer works with latest versions of Discord
+
+
 Automatic translation of incoming/outgoing messages by many of translation engines
 (Use the Settings tab to install the dependencies of some engines)
 
